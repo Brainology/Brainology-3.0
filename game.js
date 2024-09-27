@@ -1,76 +1,49 @@
-"use client";
+document.addEventListener("DOMContentLoaded", () => {
+  // DOM Elements
+  const gameContent = document.getElementById("game-content");
+  const startButton = document.getElementById("start-button");
+  const highScoreDisplay = document.getElementById("high-score");
+  const themeToggle = document.getElementById("theme-toggle");
+  const toggleIndicator = document.getElementById("toggle-indicator");
 
-import React, { useState, useEffect } from "react";
-import { Share2 } from "lucide-react";
-import "./globals.css";
-import { Poppins } from "next/font/google";
+  let level = 1;
+  let score = 0;
+  let highScore = 0;
+  let gameStarted = false;
+  let gameOver = false;
+  let grid = [];
+  let differentTile = [0, 0];
+  let isDarkMode = true;
 
-const getRandomColor = () => {
-  return `#${Math.floor(Math.random() * 16777215).toString(16)}`;
-};
+  // Initialize High Score from localStorage
+  highScore = localStorage.getItem("highScore") || 0;
+  highScoreDisplay.textContent = `High Score: ${highScore}`;
 
-const getDarkerOrLighterShade = (color, percent, isDarker) => {
-  const num = parseInt(color.replace("#", ""), 16),
-    amt = Math.round(2.55 * percent),
-    R = (num >> 16) + (isDarker ? -amt : amt),
-    G = (num >> 8 & 0x00FF) + (isDarker ? -amt : amt),
-    B = (num & 0x0000FF) + (isDarker ? -amt : amt);
-  return `#${(1 << 24 | (R < 255 ? R < 1 ? 0 : R : 255) << 16 | (G < 255 ? G < 1 ? 0 : G : 255) << 8 | (B < 255 ? B < 1 ? 0 : B : 255)).toString(16).slice(1)}`;
-};
+  // Set Dark Mode by default
+  document.documentElement.classList.add("dark");
 
-const poppins = Poppins({
-  weight: ["400", "600", "700"],
-  subsets: ["latin"],
-  display: "swap",
-});
+  // Event Listeners
+  startButton.addEventListener("click", startGame);
+  themeToggle.addEventListener("click", toggleDarkMode);
 
-export const metadata = {
-  title: "Brainology 3.0",
-  description: "Test your color perception skills!",
-};
-
-const Game = () => {
-  const [level, setLevel] = useState(1);
-  const [score, setScore] = useState(0);
-  const [highScore, setHighScore] = useState(0);
-  const [gameStarted, setGameStarted] = useState(false);
-  const [gameOver, setGameOver] = useState(false);
-  const [grid, setGrid] = useState([]);
-  const [differentTile, setDifferentTile] = useState([0, 0]);
-  const [isDarkMode, setIsDarkMode] = useState(true);
-
-  // Set dark mode by default
-  useEffect(() => {
-    document.documentElement.classList.add("dark");
-  }, []);
-
-  useEffect(() => {
-    const storedHighScore = localStorage.getItem("highScore");
-    if (storedHighScore) setHighScore(parseInt(storedHighScore));
-  }, []);
-
-  useEffect(() => {
-    if (score > highScore) {
-      setHighScore(score);
-      localStorage.setItem("highScore", score.toString());
-    }
-  }, [score, highScore]);
-
-  const startGame = () => {
-    setGameStarted(true);
-    setGameOver(false);
-    setScore(0);
-    setLevel(1);
+  function startGame() {
+    gameStarted = true;
+    gameOver = false;
+    score = 0;
+    level = 1;
+    updateScoreDisplay();
     generateGrid();
-  };
+    gameContent.innerHTML = '';
+    renderGame();
+  }
 
-  const generateGrid = () => {
+  function generateGrid() {
     const gridSize = Math.min(level + 1, 12);
     const baseColor = getRandomColor();
-    const newGrid = Array(gridSize).fill(null).map(() => Array(gridSize).fill(baseColor));
+    grid = Array(gridSize).fill(null).map(() => Array(gridSize).fill(baseColor));
 
     const [x, y] = [Math.floor(Math.random() * gridSize), Math.floor(Math.random() * gridSize)];
-    setDifferentTile([x, y]);
+    differentTile = [x, y];
 
     let differentColor;
     if (level <= 6) {
@@ -81,47 +54,85 @@ const Game = () => {
       differentColor = getDarkerOrLighterShade(baseColor, 5, false);
     }
 
-    newGrid[x][y] = differentColor;
-    setGrid(newGrid);
-  };
+    grid[x][y] = differentColor;
+  }
 
-  const handleTileClick = (x, y) => {
+  function renderGame() {
+    const gridSize = grid.length;
+    gameContent.innerHTML = `
+      <h4 class="text-xl mb-2 text-gray-700 dark:text-gray-300">Level: ${level}</h4>
+      <h3 class="text-2xl font-bold mb-4" style="color: hsl(${Math.min(score / 150 * 120, 120)}, 100%, 50%)">${score}</h3>
+      <div class="grid gap-2" style="grid-template-columns: repeat(${gridSize}, minmax(0, 1fr))">
+        ${grid.map((row, x) =>
+          row.map((color, y) =>
+            `<button class="w-12 h-12 rounded-lg transition-colors duration-200" style="background-color: ${color}" onclick="handleTileClick(${x}, ${y})"></button>`
+          ).join('')
+        ).join('')}
+      </div>
+    `;
+  }
+
+  function handleTileClick(x, y) {
     if (x === differentTile[0] && y === differentTile[1]) {
-      setScore(score + 1);
-      if (score + 1 >= 150) {
+      score++;
+      if (score >= 150) {
         winGame();
       } else if ((score + 1) % getRoundsPerLevel(level) === 0) {
-        setLevel(level + 1);
+        level++;
       }
       generateGrid();
+      renderGame();
     } else {
       endGame();
     }
-  };
+  }
 
-  const getRoundsPerLevel = (level) => {
-    if (level <= 3) return 5;
-    return 7 + (level - 4) * 2;
-  };
+  function getRoundsPerLevel(level) {
+    return level <= 3 ? 5 : 7 + (level - 4) * 2;
+  }
 
-  const endGame = () => {
-    setGameOver(true);
+  function endGame() {
+    gameOver = true;
     showNotification(getNotificationMessage());
-  };
+    gameContent.innerHTML = `
+      <button class="px-6 py-3 bg-blue-500 text-white rounded-full text-lg font-semibold mb-4" onclick="startGame()">Play Again</button>
+      <p class="text-xl mb-2 text-gray-700 dark:text-gray-300">Game Over! Your score: ${score}</p>
+      <button class="px-4 py-2 bg-green-500 text-white rounded-full text-md font-semibold mb-4" onclick="shareScore()">Share Score</button>
+    `;
+    updateHighScore();
+  }
 
-  const winGame = () => {
-    setGameOver(true);
+  function winGame() {
+    endGame();
     showNotification("Woo-hoo! Congratulations! You have eagle eyes! Share your achievement and invite friends to test their skills too!");
-  };
+  }
 
-  const showNotification = (message) => {
-    if ("Notification" in window && Notification.permission === "granted") {
-      new Notification(message);
+  function updateHighScore() {
+    if (score > highScore) {
+      highScore = score;
+      localStorage.setItem("highScore", highScore);
+      highScoreDisplay.textContent = `High Score: ${highScore}`;
     }
-  };
+  }
 
-  const getNotificationMessage = () => {
-    if (score >= 150) return "Woo-hoo! Congratulations! You have eagle eyes!";
+  function updateScoreDisplay() {
+    highScoreDisplay.textContent = `High Score: ${highScore}`;
+  }
+
+  function getRandomColor() {
+    return `#${Math.floor(Math.random() * 16777215).toString(16)}`;
+  }
+
+  function getDarkerOrLighterShade(color, percent, isDarker) {
+    const num = parseInt(color.replace("#", ""), 16),
+      amt = Math.round(2.55 * percent),
+      R = (num >> 16) + (isDarker ? -amt : amt),
+      G = (num >> 8 & 0x00FF) + (isDarker ? -amt : amt),
+      B = (num & 0x0000FF) + (isDarker ? -amt : amt);
+    return `#${(1 << 24 | (R < 255 ? R < 1 ? 0 : R : 255) << 16 | (G < 255 ? G < 1 ? 0 : G : 255) << 8 | (B < 255 ? B < 1 ? 0 : B : 255)).toString(16).slice(1)}`;
+  }
+
+  function getNotificationMessage() {
     const messages = [
       "You're so close! Try again and beat your high score!",
       "Just missed it! You've got what it takes, try again!",
@@ -135,9 +146,15 @@ const Game = () => {
       "Almost there! One more round and you'll break through!",
     ];
     return messages[Math.min(Math.floor(score / 15), messages.length - 1)];
-  };
+  }
 
-  const shareScore = () => {
+  function showNotification(message) {
+    if ("Notification" in window && Notification.permission === "granted") {
+      new Notification(message);
+    }
+  }
+
+  function shareScore() {
     const message = `I just scored ${score} in Brainology 3.0! Can you beat my score? Play now: [Your Game URL]`;
     if (navigator.share) {
       navigator.share({
@@ -148,81 +165,16 @@ const Game = () => {
     } else {
       alert('Sharing is not supported on this browser, but we appreciate your enthusiasm! Here\'s the message to share:\n\n' + message);
     }
-  };
+  }
 
-  const toggleDarkMode = () => {
-    setIsDarkMode(!isDarkMode);
+  function toggleDarkMode() {
+    isDarkMode = !isDarkMode;
     document.documentElement.classList.toggle("dark");
-  };
+    toggleIndicator.style.transform = isDarkMode ? 'translateX(6px)' : 'translateX(0px)';
+    themeToggle.style.backgroundColor = isDarkMode ? 'rgb(37 99 235)' : 'rgb(156 163 175)';
+  }
 
-  return (
-    <html lang="en" className="dark">
-      <body className={`${poppins.className} bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100`}>
-        <div className={`min-h-screen flex flex-col items-center justify-center p-4 ${isDarkMode ? "dark" : ""}`}>
-          <h2 className="text-3xl font-bold mb-4 text-gray-800 dark:text-gray-200">Brainology 3.0</h2>
-          {gameStarted && !gameOver && (
-            <>
-              <h4 className="text-xl mb-2 text-gray-700 dark:text-gray-300">Level: {level}</h4>
-              <h3 className="text-2xl font-bold mb-4" style={{ color: `hsl(${Math.min(score / 150 * 120, 120)}, 100%, 50%)` }}>
-                {score}
-              </h3>
-              <div className="grid gap-2" style={{ gridTemplateColumns: `repeat(${grid.length}, minmax(0, 1fr))` }}>
-                {grid.map((row, x) =>
-                  row.map((color, y) => (
-                    <button
-                      key={`${x}-${y}`}
-                      className="w-12 h-12 rounded-lg transition-colors duration-200"
-                      style={{ backgroundColor: color }}
-                      onClick={() => handleTileClick(x, y)}
-                    />
-                  ))
-                )}
-              </div>
-            </>
-          )}
-          {(!gameStarted || gameOver) && (
-            <div className="text-center">
-              <button className="px-6 py-3 bg-blue-500 text-white rounded-full text-lg font-semibold mb-4" onClick={startGame}>
-                {gameOver ? "Play Again" : "Start Game"}
-              </button>
-              {gameOver && (
-                <>
-                  <p className="text-xl mb-2 text-gray-700 dark:text-gray-300">Game Over! Your score: {score}</p>
-                  <button
-                    className="px-4 py-2 bg-green-500 text-white rounded-full text-md font-semibold mb-4 flex items-center justify-center mx-auto"
-                    onClick={shareScore}
-                  >
-                    <Share2 className="mr-2" size={18} />
-                    Share Score
-                  </button>
-                </>
-              )}
-            </div>
-          )}
-          <div className="mt-4 text-gray-600 dark:text-gray-400">High Score: {highScore}</div>
-          {/* Ad space */}
-          <div className="mt-8 w-full max-w-md h-20 bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-gray-400">
-            Ad Space
-          </div>
-          {/* Theme toggle switch */}
-          <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 flex items-center bg-gray-200 dark:bg-gray-800 rounded-full p-1">
-            <span className="text-sm mr-2 text-gray-700 dark:text-gray-300">Dark Mode</span>
-            <div
-              className={`w-14 h-7 flex items-center rounded-full p-1 cursor-pointer ${isDarkMode ? "bg-primary" : "bg-gray-400"}`}
-              onClick={toggleDarkMode}
-            >
-              <div
-                className={`bg-white w-6 h-6 rounded-full shadow-md transform transition-transform duration-300 ${
-                  isDarkMode ? "translate-x-6" : "translate-x-0"
-                }`}
-              />
-            </div>
-          </div>
-          <p className="text-gray-600 dark:text-gray-400 text-sm mt-4">Made with ❤️ by H. Brave for the 🌏</p>
-        </div>
-      </body>
-    </html>
-  );
-};
-
-export default Game;
+  if ("Notification" in window && Notification.permission !== "granted") {
+    Notification.requestPermission();
+  }
+});
