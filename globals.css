@@ -33,3 +33,7 @@ body {
     --color-primary: 37 99 235;
   }
 }
+
+.bg-primary {
+  background-color: rgb(var(--color-primary));
+}
