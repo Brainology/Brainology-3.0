@@ -1,6 +1,8 @@
 let level = 1;
 let score = 0;
-let gridSize = 3;
+let gridSize = 2;
+let rounds = 5;
+let roundCount = 0;
 let variation = 6;
 let correctTile = null;
 let tiles = [];
@@ -16,13 +18,24 @@ const gameOverMessage = document.getElementById('game-over-message');
 function startGame() {
     startButton.style.display = 'none';
     gameInProgress = true;
+    roundCount = 0;
     generateGrid();
 }
 
 function generateGrid() {
+    if (roundCount >= rounds) {
+        level++;
+        if (level <= 3) {
+            gridSize = level + 1; // 2x2 for level 1, 3x3 for level 2, etc.
+            rounds = 5;
+        } else {
+            rounds = 7 + (level - 4) * 2; // Increase rounds from level 4
+        }
+        roundCount = 0;
+    }
+
     gridContainer.innerHTML = '';
-    gridSize = Math.min(12, Math.floor((level + 1) / 2) + 2);
-    variation = Math.max(3, 6 - Math.floor((level - 1) / 12));
+    roundCount++;
 
     const baseColor = getRandomColor();
     correctTile = Math.floor(Math.random() * gridSize * gridSize);
@@ -31,7 +44,6 @@ function generateGrid() {
         tile.classList.add('tile');
         if (index === correctTile) {
             tile.style.backgroundColor = adjustColor(baseColor, variation);
-            tile.classList.add('correct');
         } else {
             tile.style.backgroundColor = baseColor;
         }
@@ -48,9 +60,8 @@ function onTileClick(index) {
 
     if (index === correctTile) {
         score += 1;
-        level += 1;
         animateCorrectTile(tiles[index]);
-        setTimeout(generateGrid, 500);
+        setTimeout(generateGrid, 500); // Wait before generating new grid
     } else {
         gameOver();
     }
@@ -69,7 +80,7 @@ function updateLevelAndScore() {
 }
 
 function getRandomColor() {
-    const r = Math.floor(Math.random() * 200) + 56;
+    const r = Math.floor(Math.random() * 200) + 56; // Random RGB values
     const g = Math.floor(Math.random() * 200) + 56;
     const b = Math.floor(Math.random() * 200) + 56;
     return `rgb(${r}, ${g}, ${b})`;
@@ -77,31 +88,35 @@ function getRandomColor() {
 
 function adjustColor(color, variation) {
     const rgb = color.match(/\d+/g);
-    return `rgb(${rgb[0] - variation}, ${rgb[1] - variation}, ${rgb[2] - variation})`;
+    return `rgb(${Math.max(0, rgb[0] - variation)}, ${Math.max(0, rgb[1] - variation)}, ${Math.max(0, rgb[2] - variation)})`; // Ensure RGB values stay within bounds
 }
 
 function gameOver() {
     gameInProgress = false;
+    alert("😣 Uh-huh! Try relaxing your eyes for 10 minutes! 😌");
     displayGameOverMessage();
     gameOverScreen.classList.add('active');
 }
 
 function displayGameOverMessage() {
     const messages = [
-        "You're so close! Try again and beat your high score!",
-        "Just missed it! You’ve got what it takes, try again!",
-        "Almost there! A few more tries and victory is yours!",
-        "Don’t stop now! The next level is waiting for you!",
-        "Great effort! Keep going, the next challenge awaits you!",
-        "You’ve mastered this far, now push through to the top!",
-        "Your progress is amazing! Restart and climb even higher!",
-        "Unstoppable! Try again, and conquer the toughest levels yet!",
-        "Challenge accepted? Keep playing and dominate the leaderboard!",
-        "Almost there! One more round and you’ll break through!",
-        "Woo-hoo! Congratulations! You have eagle eyes! Share your achievement and invite friends to test their skills too!"
+        "🔍 You're so close! Try again and beat your high score! 🎯",
+        "💪 Just missed it! You’ve got what it takes, try again! 🔁",
+        "🏃‍♂️ Almost there! A few more tries and victory is yours! 🏆",
+        "🔥 Don’t stop now! The next level is waiting for you! 🚀",
+        "👏 Great effort! Keep going, the next challenge awaits you! 🎮",
+        "🌟 You’ve mastered this far, now push through to the top! 🔝",
+        "⚡ Your progress is amazing! Restart and climb even higher! ⏫",
+        "💥 Unstoppable! Try again, and conquer the toughest levels yet! 🗻",
+        "🎯 Challenge accepted? Keep playing and dominate the leaderboard! 🏅",
+        "🏁 Almost there! One more round and you’ll break through! 🥇"
     ];
     let messageIndex = Math.floor(score / 15);
-    gameOverMessage.textContent = messages[messageIndex] || messages[messages.length - 1];
+    if (score === 150) {
+        gameOverMessage.textContent = "🎉 Woo-hoo! Congratulations! You have eagle eyes! 🦅 Share your achievement and invite friends to test their skills too! 📣";
+    } else {
+        gameOverMessage.textContent = messages[messageIndex] || messages[messages.length - 1];
+    }
 }
 
 function restartGame() {
@@ -119,4 +134,10 @@ function shareGame() {
         url: window.location.href
     };
     navigator.share(shareData).catch(console.error);
+}
+
+function toggleMode() {
+    const body = document.body;
+    body.classList.toggle('light-mode');
+    body.classList.toggle('dark-mode');
 }
