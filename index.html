@@ -7,7 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
 </head>
-<body>
+<body class="dark-mode">
     <div class="container">
         <h2 class="game-title">Brainology 3.0</h2>
         <h4 class="level">Level: <span id="level-number">1</span></h4>
@@ -21,6 +21,10 @@
             <p id="game-over-message"></p>
             <button class="restart-button" onclick="restartGame()">Restart</button>
             <button class="share-button" onclick="shareGame()">Share</button>
+        </div>
+        <div class="mode-toggle">
+            <input type="checkbox" id="mode-switch" onchange="toggleMode()">
+            <label for="mode-switch" class="switch-label">Dark Mode</label>
         </div>
     </div>
     <script src="script.js"></script>
