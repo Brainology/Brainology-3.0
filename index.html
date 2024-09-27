@@ -1,15 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Brainology 3.0 - Test your color perception skills!" />
-    <title>Brainology 3.0</title>
-    <link rel="stylesheet" href="globals.css" />
-  </head>
-  <body>
-    <div id="root"></div>
-
-    <script type="module" src="./game.js"></script>
-  </body>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Brainology 3.0 - Test your color perception skills!" />
+  <title>Brainology 3.0</title>
+  <link rel="stylesheet" href="globals.css" />
+</head>
+<body>
+  <div id="game-container" class="min-h-screen flex flex-col items-center justify-center p-4">
+    <h2 class="text-3xl font-bold mb-4 text-gray-800 dark:text-gray-200">Brainology 3.0</h2>
+    <div id="game-content" class="text-center">
+      <!-- Game content will be dynamically injected here -->
+      <button id="start-button" class="px-6 py-3 bg-blue-500 text-white rounded-full text-lg font-semibold mb-4">
+        Start Game
+      </button>
+    </div>
+    <div class="mt-4 text-gray-600 dark:text-gray-400" id="high-score">High Score: 0</div>
+    <!-- Ad space -->
+    <div class="mt-8 w-full max-w-md h-20 bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-gray-400">
+      Ad Space
+    </div>
+    <!-- Theme toggle switch -->
+    <div class="fixed bottom-4 left-1/2 transform -translate-x-1/2 flex items-center bg-gray-200 dark:bg-gray-800 rounded-full p-1">
+      <span class="text-sm mr-2 text-gray-700 dark:text-gray-300">Dark Mode</span>
+      <div id="theme-toggle" class="w-14 h-7 flex items-center rounded-full p-1 cursor-pointer bg-gray-400">
+        <div id="toggle-indicator" class="bg-white w-6 h-6 rounded-full shadow-md transform transition-transform duration-300 translate-x-0"></div>
+      </div>
+    </div>
+    <p class="text-gray-600 dark:text-gray-400 text-sm mt-4">Made with ❤️ by H. Brave for the 🌏</p>
+  </div>
+  <script src="game.js"></script>
+</body>
 </html>
