@@ -1,7 +1,8 @@
-body {
-    font-family: 'Poppins', sans-serif;
-    background-color: #f0f0f0;
+/* Reset default styles */
+body, html {
     margin: 0;
+    padding: 0;
+    font-family: 'Poppins', sans-serif;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -13,69 +14,140 @@ body {
     text-align: center;
 }
 
-.title {
-    font-size: 2rem;
-    margin-bottom: 20px;
+.game-title {
+    font-size: 24px;
+    margin-bottom: 10px;
 }
 
 .level {
-    font-size: 1.5rem;
+    font-size: 18px;
+    margin: 5px 0;
 }
 
-#score {
-    font-size: 2rem;
-    color: red;
-    margin: 20px 0;
+.score {
+    font-size: 24px;
+    margin: 5px 0;
+    transition: color 0.3s;
 }
 
-.grid {
+.grid-container {
     display: grid;
+    justify-content: center;
     gap: 10px;
-    margin: 20px auto;
+    margin-top: 20px;
 }
 
 .tile {
     width: 50px;
     height: 50px;
-    border-radius: 8px;
+    background-color: #8ebf42;
     cursor: pointer;
-    transition: transform 0.1s, box-shadow 0.2s;
+    border-radius: 10px;
+    transition: transform 0.3s, box-shadow 0.3s;
 }
 
-.tile:hover {
-    opacity: 0.8; /* Removed hover color to avoid confusion */
-}
-
-.tile:active {
+.tile.correct {
     transform: scale(0.95);
-    box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+    box-shadow: 0 0 10px rgba(0, 255, 0, 0.7);
 }
 
-.toggle-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-top: 20px;
+.start-button, .restart-button, .share-button {
+    padding: 10px 20px;
+    font-size: 16px;
+    margin: 15px;
+    cursor: pointer;
+    border: none;
+    background-color: #8ebf42;
+    color: #fff;
+    border-radius: 5px;
+    transition: background-color 0.3s;
 }
 
-.toggle-label {
-    margin: 0 10px;
+.start-button:hover, .restart-button:hover, .share-button:hover {
+    background-color: #6b9c32;
 }
 
-.toggle {
+.game-over {
     display: none;
 }
 
-.toggle + .toggle-label {
-    cursor: pointer;
+.game-over.active {
+    display: block;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgba(0, 0, 0, 0.8);
+    padding: 30px;
+    border-radius: 10px;
+    color: #fff;
 }
 
-/* Dark mode styles */
-body.dark-mode {
+.mode-toggle {
+    position: fixed;
+    bottom: 10px;
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    align-items: center;
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: 0.4s;
+    border-radius: 34px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: 0.4s;
+    border-radius: 50%;
+}
+
+input:checked + .slider {
+    background-color: #8ebf42;
+}
+
+input:checked + .slider:before {
+    transform: translateX(26px);
+}
+
+.mode-label {
+    font-size: 12px;
+    margin: 0 10px;
+}
+
+.dark-mode {
     background-color: #333;
     color: #fff;
 }
 
-body.dark-mode #score {
-    color: lime;
+.light-mode {
+    background-color: #f0f0f0;
+    color: #333;
 }
