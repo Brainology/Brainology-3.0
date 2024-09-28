@@ -34,6 +34,7 @@ function generateGrid() {
         roundCount = 0;
     }
 
+    gridContainer.style.gridTemplateColumns = `repeat(${gridSize}, 1fr)`; // Update grid size
     gridContainer.innerHTML = '';
     roundCount++;
 
@@ -60,6 +61,7 @@ function onTileClick(index) {
 
     if (index === correctTile) {
         score += 1;
+        updateScoreColor();
         animateCorrectTile(tiles[index]);
         setTimeout(generateGrid, 500); // Wait before generating new grid
     } else {
@@ -79,8 +81,15 @@ function updateLevelAndScore() {
     scoreNumber.textContent = score;
 }
 
+function updateScoreColor() {
+    // Update score color based on progression
+    const colorGradient = ['#ff0000', '#ff6600', '#ffcc00', '#66cc00', '#00cc00'];
+    let colorIndex = Math.min(Math.floor(score / 10), colorGradient.length - 1);
+    scoreNumber.style.color = colorGradient[colorIndex];
+}
+
 function getRandomColor() {
-    const r = Math.floor(Math.random() * 200) + 56; // Random RGB values
+    const r = Math.floor(Math.random() * 200) + 56;
     const g = Math.floor(Math.random() * 200) + 56;
     const b = Math.floor(Math.random() * 200) + 56;
     return `rgb(${r}, ${g}, ${b})`;
@@ -88,7 +97,7 @@ function getRandomColor() {
 
 function adjustColor(color, variation) {
     const rgb = color.match(/\d+/g);
-    return `rgb(${Math.max(0, rgb[0] - variation)}, ${Math.max(0, rgb[1] - variation)}, ${Math.max(0, rgb[2] - variation)})`; // Ensure RGB values stay within bounds
+    return `rgb(${Math.max(0, rgb[0] - variation)}, ${Math.max(0, rgb[1] - variation)}, ${Math.max(0, rgb[2] - variation)})`;
 }
 
 function gameOver() {
@@ -109,28 +118,28 @@ function displayGameOverMessage() {
         "⚡ Your progress is amazing! Restart and climb even higher! ⏫",
         "💥 Unstoppable! Try again, and conquer the toughest levels yet! 🗻",
         "🎯 Challenge accepted? Keep playing and dominate the leaderboard! 🏅",
-        "🏁 Almost there! One more round and you’ll break through! 🥇"
+        "🏁 Almost there! One more round and you’ll break through! 🥇",
+        "🎉 Woo-hoo! Congratulations! You have eagle eyes! 🦅 Share your achievement and invite friends to test their skills too! 📣"
     ];
     let messageIndex = Math.floor(score / 15);
-    if (score === 150) {
-        gameOverMessage.textContent = "🎉 Woo-hoo! Congratulations! You have eagle eyes! 🦅 Share your achievement and invite friends to test their skills too! 📣";
-    } else {
-        gameOverMessage.textContent = messages[messageIndex] || messages[messages.length - 1];
-    }
+    messageIndex = Math.min(messageIndex, messages.length - 1);
+    gameOverMessage.textContent = messages[messageIndex];
 }
 
 function restartGame() {
     gameOverScreen.classList.remove('active');
     level = 1;
     score = 0;
+    gridSize = 2;
+    rounds = 5;
     gameInProgress = true;
     generateGrid();
 }
 
 function shareGame() {
     const shareData = {
-        title: 'Brainology 3.0',
-        text: `I scored ${score} points on Brainology 3.0! Can you beat my score?`,
+        title: 'ColorTest',
+        text: `I scored ${score} points on ColorTest! Can you beat my score?`,
         url: window.location.href
     };
     navigator.share(shareData).catch(console.error);
@@ -141,3 +150,6 @@ function toggleMode() {
     body.classList.toggle('light-mode');
     body.classList.toggle('dark-mode');
 }
+
+// Initiate with dark mode
+document.getElementById('mode-switch').checked = true;
