@@ -3,20 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="styles.css">
     <title>ColorTest</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
 </head>
-<body>
+<body class="dark-mode">
     <div class="container">
-        <h2 class="title">ColorTest</h2>
-        <h4 class="level">Level: <span id="current-level">1</span></h4>
-        <h2 id="score">0</h2>
-        <div id="grid-container" class="grid"></div>
-        <button id="start-button" class="start-button">Tap to Start</button>
-        <div class="toggle-container">
-            <label for="toggle" class="toggle-label">Dark Mode</label>
-            <input type="checkbox" id="toggle" class="toggle">
-            <label for="toggle" class="toggle-label">Light Mode</label>
+        <h2 class="game-title">ColorTest</h2>
+        <h4 class="level">Level: <span id="level-number">1</span></h4>
+        <h2 class="score"><span id="score-number">0</span></h2>
+        <div class="grid-container">
+            <!-- Grid tiles will be generated here by JavaScript -->
+        </div>
+        <button class="start-button" onclick="startGame()">Tap to Start</button>
+        <div class="game-over">
+            <h2>Game Over</h2>
+            <p id="game-over-message"></p>
+            <button class="restart-button" onclick="restartGame()">Restart</button>
+            <button class="share-button" onclick="shareGame()">Share</button>
+        </div>
+        <div class="mode-toggle">
+            <label class="switch">
+                <input type="checkbox" id="mode-switch" onchange="toggleMode()">
+                <span class="slider"></span>
+            </label>
+            <span class="mode-label">Dark Mode</span>
+            <span class="mode-label">Light Mode</span>
         </div>
     </div>
     <script src="script.js"></script>
